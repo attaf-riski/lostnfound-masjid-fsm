@@ -9,7 +9,7 @@
 <div class="card">
   <div class="row g-0">
     <div class="col-md-5">
-      <img src="/uploads/<%= item.image %>" class="img-fluid rounded-start" alt="<%= item.name %>">
+      <img src="https://storage.cloud.google.com/lost-and-found-masjid-fsm/<%= item.image %>" class="img-fluid rounded-start" alt="<%= item.name %>">
       <div class="card-img-overlay" style="width: fit-content">
         <span class="badge <%= item.status === 'hilang' ? 'bg-danger' : 'bg-success' %>">
           <%= item.status === 'hilang' ? 'Hilang' : 'Ditemukan' %>
@@ -62,7 +62,7 @@
           <h5>Informasi Pengklaim:</h5>
           <% if (item.claimerImage) { %>
             <div class="mb-3">
-              <img src="/uploads/<%= item.claimerImage %>" class="img-fluid rounded" style="max-width: 200px;" alt="Foto Pengklaim">
+              <img src="https://storage.cloud.google.com/lost-and-found-masjid-fsm/<%= item.claimerImage %>" class="img-fluid rounded" style="max-width: 200px;" alt="Foto Pengklaim">
             </div>
           <% } %>
           <% if (item.claimerName) { %>

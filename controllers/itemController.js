@@ -1,6 +1,61 @@
 const Item = require('../models/item');
 const path = require('path');
-const fs = require('fs');
+const { Storage } = require('@google-cloud/storage');
+
+// Initialize Google Cloud Storage
+const storage = new Storage({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID
+});
+
+const bucket = storage.bucket(process.env.GOOGLE_CLOUD_BUCKET_NAME);
+
+// Helper function to upload file to Google Cloud Storage
+const uploadToGCS = (file) => {
+  return new Promise((resolve, reject) => {
+    if (!file) {
+      reject('No file provided');
+      return;
+    }
+
+    const uniqueFilename = `${Date.now()}-${file.originalname}`;
+    const blob = bucket.file(uniqueFilename);
+    const blobStream = blob.createWriteStream({
+      resumable: false,
+      contentType: file.mimetype
+    });
+
+    blobStream.on('error', (err) => {
+      reject(err);
+    });
+
+    blobStream.on('finish', () => {
+      // Make the file public
+      blob.makePublic().then(() => {
+        const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+        resolve({
+          filename: uniqueFilename,
+          url: publicUrl
+        });
+      }).catch(err => reject(err));
+    });
+
+    blobStream.end(file.buffer);
+  });
+};
+
+// Helper function to delete file from Google Cloud Storage
+const deleteFromGCS = async (filename) => {
+  if (!filename || filename === 'default-item.jpg') {
+    return;
+  }
+  
+  try {
+    await bucket.file(filename).delete();
+  } catch (error) {
+    console.error(`Error deleting file ${filename} from GCS:`, error);
+  }
+};
 
 // Menampilkan semua barang untuk publik
 exports.getAllItems = async (req, res) => {
@@ -53,11 +108,14 @@ exports.getAddItemForm = (req, res) => {
 // Proses tambah barang
 exports.addItem = async (req, res) => {
   try {
-    let imageName = 'default-item.jpg';
+    let imageData = {
+      filename: 'default-item.jpg',
+      url: `https://storage.googleapis.com/${bucket.name}/default-item.jpg`
+    };
     
     // Jika ada file yang diupload
     if (req.file) {
-      imageName = req.file.filename;
+      imageData = await uploadToGCS(req.file);
     }
     
     const newItem = new Item({
@@ -67,19 +125,21 @@ exports.addItem = async (req, res) => {
       category: req.body.category,
       date: req.body.date ? new Date(req.body.date) : new Date(),
       status: req.body.status,
-      image: imageName,
+      image: imageData.filename,
+      imageUrl: imageData.url,
       contactPerson: req.body.contactPerson,
       contactPhone: req.body.contactPhone,
-      claimerName:"",
+      claimerName: "",
       claimerPhone: "",
-      claimerImage: ""
-
+      claimerImage: "",
+      claimerImageUrl: ""
     });
     
     await newItem.save();
     req.flash('success', 'Barang berhasil ditambahkan');
     res.redirect('/admin/dashboard');
   } catch (error) {
+    console.error('Error adding item:', error);
     req.flash('error', 'Terjadi kesalahan saat menambahkan barang');
     res.redirect('/admin/add-item');
   }
@@ -112,31 +172,31 @@ exports.updateItem = async (req, res) => {
       return res.redirect('/admin/dashboard');
     }
 
-    let imageName = item.image;
-    let claimerImageName = item.claimerImage;
+    let imageData = {
+      filename: item.image,
+      url: item.imageUrl
+    };
+    let claimerImageData = {
+      filename: item.claimerImage,
+      url: item.claimerImageUrl
+    };
 
     // Handle item image upload
     if (req.files && req.files.image && req.files.image[0]) {
       // Hapus gambar lama jika bukan default
       if (item.image && item.image !== 'default-item.jpg') {
-        const imagePath = path.join(__dirname, '../public/uploads/', item.image);
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        }
+        await deleteFromGCS(item.image);
       }
-      imageName = req.files.image[0].filename;
+      imageData = await uploadToGCS(req.files.image[0]);
     }
 
     // Handle claimer image upload
     if (req.files && req.files.claimerImage && req.files.claimerImage[0]) {
       // Hapus gambar claimer lama jika ada
       if (item.claimerImage) {
-        const claimerImagePath = path.join(__dirname, '../public/uploads/', item.claimerImage);
-        if (fs.existsSync(claimerImagePath)) {
-          fs.unlinkSync(claimerImagePath);
-        }
+        await deleteFromGCS(item.claimerImage);
       }
-      claimerImageName = req.files.claimerImage[0].filename;
+      claimerImageData = await uploadToGCS(req.files.claimerImage[0]);
     }
 
     const updatedItem = {
@@ -146,12 +206,14 @@ exports.updateItem = async (req, res) => {
       category: req.body.category,
       date: req.body.date ? new Date(req.body.date) : item.date,
       status: req.body.status,
-      image: imageName,
+      image: imageData.filename,
+      imageUrl: imageData.url,
       contactPerson: req.body.contactPerson,
       contactPhone: req.body.contactPhone,
       claimerName: req.body.claimerName || item.claimerName,
       claimerPhone: req.body.claimerPhone || item.claimerPhone,
-      claimerImage: claimerImageName
+      claimerImage: claimerImageData.filename,
+      claimerImageUrl: claimerImageData.url
     };
 
     await Item.findByIdAndUpdate(req.params.id, updatedItem);
@@ -176,23 +238,26 @@ exports.deleteItem = async (req, res) => {
       req.flash('error', 'Barang masih hilang, tidak dapat dihapus');
       return res.redirect('/admin/dashboard');
     } else {
-    // Hapus gambar jika bukan default
-    if (item.image!== 'default-item.png') {
-      const imagePath = path.join(__dirname, '../public/uploads/', item.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
+      // Hapus gambar jika bukan default
+      if (item.image !== 'default-item.jpg') {
+        await deleteFromGCS(item.image);
       }
+      
+      // Hapus gambar claimer jika ada
+      if (item.claimerImage) {
+        await deleteFromGCS(item.claimerImage);
+      }
+      
+      await Item.findByIdAndDelete(req.params.id);
+      req.flash('success', 'Barang berhasil dihapus');
+      res.redirect('/admin/dashboard');
     }
-    
-    await Item.findByIdAndDelete(req.params.id);
-    req.flash('sucpngs', 'Barang berhasil dihapus');
-    res.redirect('/admin/dashboard');
-  } 
-}catch (error) {
+  } catch (error) {
+    console.error('Error deleting item:', error);
     req.flash('error', 'Terjadi kesalahan saat menghapus barang');
     res.redirect('/admin/dashboard');
   }
-}
+};
 
 // Update status barang (hilang/ditemukan)
 exports.updateItemStatus = async (req, res) => {
@@ -211,23 +276,28 @@ exports.updateItemStatus = async (req, res) => {
     // Jika status berubah menjadi ditemukan, tambahkan info pengambil
     if (newStatus === 'ditemukan') {
       if (req.file) {
-        updateData.claimerImage = req.file.filename;
+        const claimerImageData = await uploadToGCS(req.file);
+        updateData.claimerImage = claimerImageData.filename;
+        updateData.claimerImageUrl = claimerImageData.url;
       }
       updateData.claimerName = req.body.claimerName;
       updateData.claimerPhone = req.body.claimerPhone;
     } else {
-      // Jika status kembali ke hilang, hapus info pengambil
-      updateData.claimerName = null;
-      updateData.claimerPhone = null;
-      updateData.claimerImage = null;
+      // Jika status kembali ke hilang, hapus info pengambil dan gambar pengambil
+      if (item.claimerImage) {
+        await deleteFromGCS(item.claimerImage);
+      }
+      updateData.claimerName = "";
+      updateData.claimerPhone = "";
+      updateData.claimerImage = "";
+      updateData.claimerImageUrl = "";
     }
-
-    console.log(newStatus)
     
     await Item.findByIdAndUpdate(req.params.id, updateData);
     req.flash('success', `Status barang berhasil diubah menjadi ${newStatus}`);
     res.redirect('/admin/dashboard');
   } catch (error) {
+    console.error('Error updating item status:', error);
     req.flash('error', 'Terjadi kesalahan saat memperbarui status');
     res.redirect('/admin/dashboard');
   }

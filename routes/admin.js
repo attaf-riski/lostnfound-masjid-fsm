@@ -1,22 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const adminController = require('../controllers/adminController');
 const itemController = require('../controllers/itemController');
 const { isAuthenticated } = require('../middlewares/authMiddleware');
 
-// Konfigurasi multer untuk upload gambar
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/uploads/');
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${uuidv4()}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  }
-});
+// Konfigurasi multer untuk menggunakan memory storage untuk Google Cloud Storage
+// Ini membuat file disimpan di memory buffer, bukan di disk
+const storage = multer.memoryStorage();
 
 // Filter file untuk multer
 const fileFilter = (req, file, cb) => {
