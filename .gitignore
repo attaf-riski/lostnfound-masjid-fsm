@@ -1,0 +1,5 @@
+.env
+.dockerignore
+Dockerfile
+package.json
+node_modules

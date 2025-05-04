@@ -1,0 +1,96 @@
+<%- include('../partials/header', { adminPage: true }) %>
+
+<div class="mb-4">
+  <a href="/admin/dashboard" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Kembali ke Dashboard
+  </a>
+</div>
+
+<div class="card shadow">
+  <div class="card-header bg-primary text-white">
+    <h4 class="mb-0">Edit Barang</h4>
+  </div>
+  <div class="card-body">
+    <form action="/admin/edit-item/<%= item._id %>" method="POST" enctype="multipart/form-data">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="name" class="form-label">Nama Barang <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= item.name %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="category" class="form-label">Kategori <span class="text-danger">*</span></label>
+            <select class="form-select" id="category" name="category" required>
+              <option value="" disabled>Pilih kategori</option>
+              <option value="Dompet/Tas" <%= item.category === 'Dompet/Tas' ? 'selected' : '' %>>Dompet/Tas</option>
+              <option value="Elektronik" <%= item.category === 'Elektronik' ? 'selected' : '' %>>Elektronik</option>
+              <option value="Pakaian" <%= item.category === 'Pakaian' ? 'selected' : '' %>>Pakaian</option>
+              <option value="Kunci" <%= item.category === 'Kunci' ? 'selected' : '' %>>Kunci</option>
+              <option value="Dokumen" <%= item.category === 'Dokumen' ? 'selected' : '' %>>Dokumen</option>
+              <option value="Lainnya" <%= item.category === 'Lainnya' ? 'selected' : '' %>>Lainnya</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="location" class="form-label">Lokasi <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="location" name="location" value="<%= item.location %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="date" class="form-label">Tanggal <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="date" name="date" 
+                  value="<%= new Date(item.date).toISOString().split('T')[0] %>" required>
+          </div>
+        </div>
+        
+        <div class="col-md-6">
+          <div class="mb-3">
+            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="hilang" <%= item.status === 'hilang' ? 'selected' : '' %>>Hilang</option>
+              <option value="ditemukan" <%= item.status === 'ditemukan' ? 'selected' : '' %>>Ditemukan</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="contactPerson" class="form-label">Nama Kontak</label>
+            <input type="text" class="form-control" id="contactPerson" name="contactPerson" 
+                  value="<%= item.contactPerson || '' %>">
+          </div>
+          
+          <div class="mb-3">
+            <label for="contactPhone" class="form-label">Telepon Kontak</label>
+            <input type="text" class="form-control" id="contactPhone" name="contactPhone" 
+                  value="<%= item.contactPhone || '' %>">
+          </div>
+          
+          <div class="mb-3">
+            <label for="image" class="form-label">Foto Barang</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <div class="form-text">Biarkan kosong jika tidak ingin mengubah foto.</div>
+            <% if (item.image) { %>
+              <div class="mt-2">
+                <img src="/uploads/<%= item.image %>" alt="<%= item.name %>" class="img-thumbnail" style="max-height: 100px;">
+              </div>
+            <% } %>
+          </div>
+        </div>
+        
+        <div class="col-12">
+          <div class="mb-3">
+            <label for="description" class="form-label">Deskripsi <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="description" name="description" rows="5" required><%= item.description %></textarea>
+          </div>
+          
+          <div class="text-end">
+            <a href="/admin/dashboard" class="btn btn-secondary me-2">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer', { adminPage: true }) %>

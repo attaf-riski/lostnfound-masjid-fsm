@@ -1,0 +1,64 @@
+<%- include('./partials/header') %>
+
+<div class="mb-4">
+  <a href="/" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Kembali
+  </a>
+</div>
+
+<div class="card">
+  <div class="row g-0">
+    <div class="col-md-5">
+      <img src="/uploads/<%= item.image %>" class="img-fluid rounded-start" alt="<%= item.name %>">
+      <div class="card-img-overlay" style="width: fit-content">
+        <span class="badge <%= item.status === 'hilang' ? 'bg-danger' : 'bg-success' %>">
+          <%= item.status === 'hilang' ? 'Hilang' : 'Ditemukan' %>
+        </span>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div class="card-body">
+        <h2 class="card-title"><%= item.name %></h2>
+        
+        <div class="info-group">
+          <div class="info-item">
+            <i class="fas fa-tags text-muted"></i>
+            <span>Kategori: <%= item.category %></span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-map-marker-alt text-muted"></i>
+            <span>Lokasi: <%= item.location %></span>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-calendar text-muted"></i>
+            <span>Tanggal: <%= new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+          </div>
+        </div>
+        
+        <hr>
+        
+        <h5>Deskripsi:</h5>
+        <p class="card-text"><%= item.description %></p>
+        
+        <% if (item.contactPerson || item.contactPhone) { %>
+          <hr>
+          <h5>Kontak:</h5>
+          <% if (item.contactPerson) { %>
+            <div class="info-item">
+              <i class="fas fa-user text-muted"></i>
+              <span><%= item.contactPerson %></span>
+            </div>
+          <% } %>
+          <% if (item.contactPhone) { %>
+            <div class="info-item">
+              <i class="fas fa-phone text-muted"></i>
+              <span><%= item.contactPhone %></span>
+            </div>
+          <% } %>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('./partials/footer') %>

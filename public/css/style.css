@@ -1,0 +1,61 @@
+/* Global Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  main {
+    flex: 1;
+  }
+  
+  /* Card Styles */
+  .card-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: white;
+    font-weight: bold;
+    z-index: 1;
+  }
+  
+  .status-lost {
+    background-color: #dc3545;
+  }
+  
+  .status-found {
+    background-color: #198754;
+  }
+  
+  .info-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #6c757d;
+  }
+  
+  .info-item i {
+    width: 20px;
+    margin-right: 8px;
+  }
+  
+  .card-img-top {
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* Filter Buttons */
+  .filter-btn.active {
+    background-color: #198754;
+    color: white;
+    border-color: #198754;
+  }

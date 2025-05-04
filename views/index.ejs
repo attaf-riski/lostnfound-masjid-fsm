@@ -1,0 +1,62 @@
+<%- include('./partials/header') %>
+
+<div class="jumbotron bg-light p-5 rounded mb-4">
+  <h1 class="display-5">Barang Hilang & Ditemukan</h1>
+  <p class="lead">Temukan informasi tentang barang hilang atau ditemukan di area masjid.</p>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="input-group">
+      <input type="text" id="searchInput" class="form-control" placeholder="Cari barang...">
+      <button class="btn btn-primary" type="button" id="searchButton">
+        <i class="fas fa-search"></i> Cari
+      </button>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="d-flex justify-content-md-end">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-outline-success filter-btn active" data-filter="all">Semua</button>
+        <button type="button" class="btn btn-outline-success filter-btn" data-filter="hilang">Hilang</button>
+        <button type="button" class="btn btn-outline-success filter-btn" data-filter="ditemukan">Ditemukan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" id="itemsContainer">
+  <% if (items && items.length > 0) { %>
+    <% items.forEach(item => { %>
+      <div class="col-md-4 mb-4 item-card" data-status="<%= item.status %>">
+        <div class="card h-100">
+          <div class="card-status <%= item.status === 'hilang' ? 'status-lost' : 'status-found' %>">
+            <%= item.status === 'hilang' ? 'Hilang' : 'Ditemukan' %>
+          </div>
+          <img src="/uploads/<%= item.image %>" class="card-img-top" alt="<%= item.name %>">
+          <div class="card-body">
+            <h5 class="card-title"><%= item.name %></h5>
+            <p class="card-text description"><%= item.description.length > 100 ? item.description.substring(0, 100) + '...' : item.description %></p>
+            <div class="info-item">
+              <i class="fas fa-map-marker-alt text-muted"></i>
+              <span><%= item.location %></span>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-calendar text-muted"></i>
+              <span><%= new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+            </div>
+            <a href="/item/<%= item._id %>" class="btn btn-primary mt-3">Detail</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <div class="col-12">
+      <div class="alert alert-info">
+        Belum ada barang hilang atau ditemukan yang tercatat.
+      </div>
+    </div>
+  <% } %>
+</div>
+
+<%- include('./partials/footer') %>

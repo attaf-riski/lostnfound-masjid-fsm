@@ -1,0 +1,99 @@
+<%- include('../partials/header', { adminPage: true }) %>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Dashboard Admin</h2>
+  <a href="/admin/add-item" class="btn btn-success">
+    <i class="fas fa-plus"></i> Tambah Barang Baru
+  </a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header bg-light">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="input-group">
+          <input type="text" id="adminSearchInput" class="form-control" placeholder="Cari barang...">
+          <button class="btn btn-primary" type="button" id="adminSearchButton">
+            <i class="fas fa-search"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="d-flex justify-content-md-end">
+          <div class="btn-group" role="group">
+            <button type="button" class="btn btn-outline-secondary admin-filter-btn active" data-filter="all">Semua</button>
+            <button type="button" class="btn btn-outline-danger admin-filter-btn" data-filter="hilang">Hilang</button>
+            <button type="button" class="btn btn-outline-success admin-filter-btn" data-filter="ditemukan">Ditemukan</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover table-striped mb-0" id="adminItemsTable">
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Nama Barang</th>
+            <th>Lokasi</th>
+            <th>Tanggal</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (items && items.length > 0) { %>
+            <% items.forEach(item => { %>
+              <tr class="item-row" data-status="<%= item.status %>">
+                <td>
+                  <img src="/uploads/<%= item.image %>" alt="<%= item.name %>" class="admin-thumbnail">
+                </td>
+                <td><%= item.name %></td>
+                <td><%= item.location %></td>
+                <td><%= new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></td>
+                <td>
+                  <span class="badge <%= item.status === 'hilang' ? 'bg-danger' : 'bg-success' %>">
+                    <%= item.status === 'hilang' ? 'Hilang' : 'Ditemukan' %>
+                  </span>
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                      Aksi
+                    </button>
+                    <ul class="dropdown-menu">
+                      <li>
+                        <a class="dropdown-item" href="/admin/edit-item/<%= item._id %>">
+                          <i class="fas fa-edit me-1"></i> Edit
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item" href="/admin/update-status/<%= item._id %>" 
+                           onclick="return confirm('Apakah Anda yakin ingin mengubah status barang ini?')">
+                          <i class="fas fa-sync-alt me-1"></i> Ubah Status
+                        </a>
+                      </li>
+                      <li>
+                        <a class="dropdown-item text-danger" href="/admin/delete-item/<%= item._id %>" 
+                           onclick="return confirm('Apakah Anda yakin ingin menghapus barang ini?')">
+                          <i class="fas fa-trash me-1"></i> Hapus
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="6" class="text-center py-3">Belum ada barang yang tercatat.</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer', { adminPage: true }) %>
