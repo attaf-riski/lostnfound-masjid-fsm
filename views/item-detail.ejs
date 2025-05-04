@@ -27,11 +27,11 @@
           </div>
           <div class="info-item">
             <i class="fas fa-map-marker-alt text-muted"></i>
-            <span>Lokasi: <%= item.location %></span>
+            <span>Lokasi Ditemukan: <%= item.location %></span>
           </div>
           <div class="info-item">
             <i class="fas fa-calendar text-muted"></i>
-            <span>Tanggal: <%= new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
+            <span>Tanggal Ditemukan: <%= new Date(item.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) %></span>
           </div>
         </div>
         
@@ -42,7 +42,7 @@
         
         <% if (item.contactPerson || item.contactPhone) { %>
           <hr>
-          <h5>Kontak:</h5>
+          <h5>Kontak Pengambilan:</h5>
           <% if (item.contactPerson) { %>
             <div class="info-item">
               <i class="fas fa-user text-muted"></i>
@@ -53,6 +53,28 @@
             <div class="info-item">
               <i class="fas fa-phone text-muted"></i>
               <span><%= item.contactPhone %></span>
+            </div>
+          <% } %>
+        <% } %>
+        
+        <% if (item.status === 'ditemukan') { %>
+          <hr>
+          <h5>Informasi Pengklaim:</h5>
+          <% if (item.claimerImage) { %>
+            <div class="mb-3">
+              <img src="/uploads/<%= item.claimerImage %>" class="img-fluid rounded" style="max-width: 200px;" alt="Foto Pengklaim">
+            </div>
+          <% } %>
+          <% if (item.claimerName) { %>
+            <div class="info-item">
+              <i class="fas fa-user text-muted"></i>
+              <span><%= item.claimerName %></span>
+            </div>
+          <% } %>
+          <% if (item.claimerPhone) { %>
+            <div class="info-item">
+              <i class="fas fa-phone text-muted"></i>
+              <span><%= item.claimerPhone %></span>
             </div>
           <% } %>
         <% } %>

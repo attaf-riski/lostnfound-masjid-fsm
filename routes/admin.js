@@ -53,9 +53,12 @@ router.get('/logout', adminController.logout);
 router.get('/add-item', itemController.getAddItemForm);
 router.post('/add-item', upload.single('image'), itemController.addItem);
 router.get('/edit-item/:id', itemController.getEditItemForm);
-router.post('/edit-item/:id', upload.single('image'), itemController.updateItem);
+router.post('/edit-item/:id', upload.fields([
+  { name: 'image', maxCount: 1 },
+  { name: 'claimerImage', maxCount: 1 }
+]), itemController.updateItem);
 router.get('/delete-item/:id', itemController.deleteItem);
-router.get('/update-status/:id', itemController.updateItemStatus);
+router.post('/update-status/:id', upload.single('claimerImage'), itemController.updateItemStatus);
 
 // Buat admin baru (hanya untuk setup awal)
 router.get('/create-admin', (req, res) => {

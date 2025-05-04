@@ -33,18 +33,15 @@
           </div>
           
           <div class="mb-3">
-            <label for="location" class="form-label">Lokasi <span class="text-danger">*</span></label>
+            <label for="location" class="form-label">Lokasi Ditemukan <span class="text-danger">*</span></label>
             <input type="text" class="form-control" id="location" name="location" value="<%= item.location %>" required>
           </div>
           
           <div class="mb-3">
-            <label for="date" class="form-label">Tanggal <span class="text-danger">*</span></label>
+            <label for="date" class="form-label">Tanggal Ditemukan <span class="text-danger">*</span></label>
             <input type="date" class="form-control" id="date" name="date" 
                   value="<%= new Date(item.date).toISOString().split('T')[0] %>" required>
           </div>
-        </div>
-        
-        <div class="col-md-6">
           <div class="mb-3">
             <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
             <select class="form-select" id="status" name="status" required>
@@ -52,6 +49,41 @@
               <option value="ditemukan" <%= item.status === 'ditemukan' ? 'selected' : '' %>>Ditemukan</option>
             </select>
           </div>
+          <div class="mb-3">
+            <label for="image" class="form-label">Foto Barang</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <div class="form-text">Biarkan kosong jika tidak ingin mengubah foto.</div>
+            <% if (item.image) { %>
+              <div class="mt-2">
+                <img src="/uploads/<%= item.image %>" alt="<%= item.name %>" class="img-thumbnail" style="max-height: 100px;">
+              </div>
+            <% } %>
+          </div>
+
+        </div>
+        
+        <div class="col-md-6">
+          
+            <div class="mb-3">
+              <label for="claimerName" class="form-label">Nama Penemu <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="claimerName" name="claimerName" value="<%= item.claimerName || '' %>" <%= item.status === 'ditemukan' ? 'required' : '' %>>
+            </div>
+
+            <div class="mb-3">
+              <label for="claimerPhone" class="form-label">Telepon Penemu <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="claimerPhone" name="claimerPhone" value="<%= item.claimerPhone || '' %>" <%= item.status === 'ditemukan' ? 'required' : '' %>>
+            </div>
+
+            <div class="mb-3">
+              <label for="claimerImage" class="form-label">Foto Penemu</label>
+              <input type="file" class="form-control" id="claimerImage" name="claimerImage" accept="image/*">
+              <div class="form-text">Biarkan kosong jika tidak ingin mengubah foto penemu.</div>
+              <% if (item.claimerImage) { %>
+                <div class="mt-2">
+                  <img src="/uploads/<%= item.claimerImage %>" alt="Foto Penemu" class="img-thumbnail" style="max-height: 100px;">
+                </div>
+              <% } %>
+            </div>
           
           <div class="mb-3">
             <label for="contactPerson" class="form-label">Nama Kontak</label>
@@ -63,17 +95,6 @@
             <label for="contactPhone" class="form-label">Telepon Kontak</label>
             <input type="text" class="form-control" id="contactPhone" name="contactPhone" 
                   value="<%= item.contactPhone || '' %>">
-          </div>
-          
-          <div class="mb-3">
-            <label for="image" class="form-label">Foto Barang</label>
-            <input type="file" class="form-control" id="image" name="image" accept="image/*">
-            <div class="form-text">Biarkan kosong jika tidak ingin mengubah foto.</div>
-            <% if (item.image) { %>
-              <div class="mt-2">
-                <img src="/uploads/<%= item.image %>" alt="<%= item.name %>" class="img-thumbnail" style="max-height: 100px;">
-              </div>
-            <% } %>
           </div>
         </div>
         

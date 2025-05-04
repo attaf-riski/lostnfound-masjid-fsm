@@ -21,7 +21,7 @@ const itemSchema = new mongoose.Schema({
   },
   image: {
     type: String,
-    default: 'default-item.jpg'
+    default: 'default-item.png'
   },
   category: {
     type: String,
@@ -36,6 +36,15 @@ const itemSchema = new mongoose.Schema({
     type: String
   },
   contactPhone: {
+    type: String
+  },
+  claimerName: {
+    type: String
+  },
+  claimerPhone: {
+    type: String
+  },
+  claimerImage: {
     type: String
   }
 }, {

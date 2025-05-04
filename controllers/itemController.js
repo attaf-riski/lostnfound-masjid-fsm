@@ -69,7 +69,11 @@ exports.addItem = async (req, res) => {
       status: req.body.status,
       image: imageName,
       contactPerson: req.body.contactPerson,
-      contactPhone: req.body.contactPhone
+      contactPhone: req.body.contactPhone,
+      claimerName:"",
+      claimerPhone: "",
+      claimerImage: ""
+
     });
     
     await newItem.save();
@@ -107,21 +111,34 @@ exports.updateItem = async (req, res) => {
       req.flash('error', 'Barang tidak ditemukan');
       return res.redirect('/admin/dashboard');
     }
-    
+
     let imageName = item.image;
-    
-    // Jika ada file yang diupload
-    if (req.file) {
+    let claimerImageName = item.claimerImage;
+
+    // Handle item image upload
+    if (req.files && req.files.image && req.files.image[0]) {
       // Hapus gambar lama jika bukan default
-      if (item.image !== 'default-item.jpg') {
+      if (item.image && item.image !== 'default-item.jpg') {
         const imagePath = path.join(__dirname, '../public/uploads/', item.image);
         if (fs.existsSync(imagePath)) {
           fs.unlinkSync(imagePath);
         }
       }
-      imageName = req.file.filename;
+      imageName = req.files.image[0].filename;
     }
-    
+
+    // Handle claimer image upload
+    if (req.files && req.files.claimerImage && req.files.claimerImage[0]) {
+      // Hapus gambar claimer lama jika ada
+      if (item.claimerImage) {
+        const claimerImagePath = path.join(__dirname, '../public/uploads/', item.claimerImage);
+        if (fs.existsSync(claimerImagePath)) {
+          fs.unlinkSync(claimerImagePath);
+        }
+      }
+      claimerImageName = req.files.claimerImage[0].filename;
+    }
+
     const updatedItem = {
       name: req.body.name,
       description: req.body.description,
@@ -131,13 +148,17 @@ exports.updateItem = async (req, res) => {
       status: req.body.status,
       image: imageName,
       contactPerson: req.body.contactPerson,
-      contactPhone: req.body.contactPhone
+      contactPhone: req.body.contactPhone,
+      claimerName: req.body.claimerName || item.claimerName,
+      claimerPhone: req.body.claimerPhone || item.claimerPhone,
+      claimerImage: claimerImageName
     };
-    
+
     await Item.findByIdAndUpdate(req.params.id, updatedItem);
     req.flash('success', 'Barang berhasil diperbarui');
     res.redirect('/admin/dashboard');
   } catch (error) {
+    console.error('Error updating item:', error);
     req.flash('error', 'Terjadi kesalahan saat memperbarui barang');
     res.redirect(`/admin/edit-item/${req.params.id}`);
   }
@@ -151,9 +172,12 @@ exports.deleteItem = async (req, res) => {
       req.flash('error', 'Barang tidak ditemukan');
       return res.redirect('/admin/dashboard');
     }
-    
+    if (item.status === 'hilang') {
+      req.flash('error', 'Barang masih hilang, tidak dapat dihapus');
+      return res.redirect('/admin/dashboard');
+    } else {
     // Hapus gambar jika bukan default
-    if (item.image !== 'default-item.jpg') {
+    if (item.image!== 'default-item.png') {
       const imagePath = path.join(__dirname, '../public/uploads/', item.image);
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
@@ -161,13 +185,14 @@ exports.deleteItem = async (req, res) => {
     }
     
     await Item.findByIdAndDelete(req.params.id);
-    req.flash('success', 'Barang berhasil dihapus');
+    req.flash('sucpngs', 'Barang berhasil dihapus');
     res.redirect('/admin/dashboard');
-  } catch (error) {
+  } 
+}catch (error) {
     req.flash('error', 'Terjadi kesalahan saat menghapus barang');
     res.redirect('/admin/dashboard');
   }
-};
+}
 
 // Update status barang (hilang/ditemukan)
 exports.updateItemStatus = async (req, res) => {
@@ -181,7 +206,25 @@ exports.updateItemStatus = async (req, res) => {
     // Toggle status
     const newStatus = item.status === 'hilang' ? 'ditemukan' : 'hilang';
     
-    await Item.findByIdAndUpdate(req.params.id, { status: newStatus });
+    const updateData = { status: newStatus };
+    
+    // Jika status berubah menjadi ditemukan, tambahkan info pengambil
+    if (newStatus === 'ditemukan') {
+      if (req.file) {
+        updateData.claimerImage = req.file.filename;
+      }
+      updateData.claimerName = req.body.claimerName;
+      updateData.claimerPhone = req.body.claimerPhone;
+    } else {
+      // Jika status kembali ke hilang, hapus info pengambil
+      updateData.claimerName = null;
+      updateData.claimerPhone = null;
+      updateData.claimerImage = null;
+    }
+
+    console.log(newStatus)
+    
+    await Item.findByIdAndUpdate(req.params.id, updateData);
     req.flash('success', `Status barang berhasil diubah menjadi ${newStatus}`);
     res.redirect('/admin/dashboard');
   } catch (error) {
