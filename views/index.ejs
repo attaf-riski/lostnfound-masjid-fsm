@@ -33,7 +33,7 @@
           <div class="card-status <%= item.status === 'hilang' ? 'status-lost' : 'status-found' %>">
             <%= item.status === 'hilang' ? 'Hilang' : 'Ditemukan' %>
           </div>
-          <img src="https://storage.cloud.google.com/lost-and-found-masjid-fsm/<%= item.image %>" class="card-img-top" alt="<%= item.name %>">
+          <img src="https://storage.googleapis.com/lost-and-found-masjid-fsm/<%= item.image %>" class="card-img-top" alt="<%= item.name %>">
           <div class="card-body">
             <h5 class="card-title"><%= item.name %></h5>
             <p class="card-text description"><%= item.description.length > 100 ? item.description.substring(0, 100) + '...' : item.description %></p>
